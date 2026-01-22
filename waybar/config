@@ -1,0 +1,96 @@
+{
+  "layer": "top",
+  "position": "bottom",
+  "height": 34,
+  "modules-left": [
+    "hyprland/language",
+    "hyprland/workspaces",
+    "hyprland/window"
+  ],
+  "modules-center": [
+    "clock#date",
+    "clock#time"
+  ],
+  "modules-right": [
+    "network",
+    "pulseaudio",
+    "temperature",
+    "battery",
+    "tray"
+  ],
+  // --- MODULE CONFIGS ---
+  "hyprland/workspaces": {
+    "disable-scroll": true,
+    "all-outputs": true,
+    "format": "{name}",
+    "format-active": "● {name}"
+  },
+  "hyprland/window": {
+    "format": "{}",
+    "max-length": 50
+  },
+  "hyprland/language": {
+    "format": "⌨ {}",
+    "interval": 1,
+    "format-en": "US",
+    "format-ru": "RU"
+  },
+  "clock#time": {
+    "interval": 1,
+    "format": " {:%H:%M:%S}",
+    "tooltip": false
+  },
+  "clock#date": {
+    "interval": 10,
+    "format": " {:%d %b}",
+    "tooltip-format": "<big>{:%Y %B}</big>\n<tt><small>{calendar}</small></tt>",
+    "on-click": "kitty -e cal"
+  },
+  "pulseaudio": {
+    "format": "  {volume}%",
+    "format-muted": "  muted",
+    "scroll-step": 5
+  },
+  "network": {
+    "format-wifi": "{icon}  {essid} ({signalStrength}%)",
+    "format-ethernet": "󰈀  wired",
+    "format-disconnected": "  offline",
+    "format-icons": [
+      "󰤯", // 0–20%
+      "󰤟", // 20–40%
+      "󰤢", // 40–60%
+      "󰤥", // 60–80%
+      "󰤨" // 80–100%
+    ],
+    "on-click": "nm-connection-editor",
+    "on-click-right": "kitty -e nmtui",
+    "tooltip": true
+  },
+  "battery": {
+    "states": {
+      "warning": 30,
+      "critical": 15
+    },
+    "format": "{icon}  {capacity}%",
+    "format-charging": "  {capacity}%",
+    "format-plugged": "  {capacity}%",
+    "format-full": "  100%",
+    "format-icons": [
+      "",
+      "",
+      "",
+      "",
+      ""
+    ]
+  },
+  "temperature": {
+    "critical-threshold": 80,
+    "format": "{icon} {temperatureC}°C",
+    "format-icons": [
+      ""
+    ]
+  },
+  "tray": {
+    "spacing": 8
+  }
+}

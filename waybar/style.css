@@ -1,0 +1,99 @@
+/* =========================
+   Nord Waybar Theme
+   ========================= */
+
+* {
+  font-family: JetBrainsMono Nerd Font, monospace;
+  font-size: 16px;
+  border: none;
+  border-radius: 0;
+  min-height: 0;
+}
+
+window#waybar {
+  background: #2e3440;
+  color: #d8dee9;
+}
+
+#workspaces,
+#window,
+#clock,
+#pulseaudio,
+#network,
+#battery,
+#language,
+#temperature,
+#tray {
+  padding: 0 10px;
+  margin: 4px 4px;
+  background: #3b4252;
+  border-radius: 10px;
+}
+
+#workspaces button {
+  padding: 0 6px;
+  color: #d8dee9;
+}
+
+#workspaces button.active {
+  color: #bf616a
+}
+
+#workspaces button.urgent {
+  color: #d08770;
+}
+
+#window {
+  color: #e5e9f0;
+}
+
+#clock {
+  font-weight: bold;
+  color: #ebcb8b;
+}
+
+#pulseaudio.muted {
+  color: #bf616a;
+}
+
+#network.disconnected {
+  color: #bf616a;
+}
+
+#battery {
+  color: #d8dee9;
+}
+
+#battery.charging {
+  color: #ebcb8b;
+}
+
+#battery.plugged {
+  color: #8fbcbb;
+}
+
+#battery.warning {
+  color: #d08770;
+}
+
+#battery.critical {
+  color: #bf616a;
+}
+
+#temperature.critical {
+  color: #bf616a;
+  font-weight: bold;
+}
+
+#language.ru {
+  color: #ebcb8b;
+}
+
+#language.en {
+  color: #a3be8c;
+}
+
+#tray {
+  padding-right: 12px;
+}
+
