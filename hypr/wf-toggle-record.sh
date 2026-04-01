@@ -21,8 +21,12 @@ if pgrep -x wf-recorder >/dev/null; then
     GIF_FILE="${LAST_VIDEO%.mp4}.gif"
 
     echo "Creating GIF..."
+    # ffmpeg -y -i "$LAST_VIDEO" \
+    #   -vf "fps=15,scale=1280:-1:flags=lanczos" \
+    #   "$GIF_FILE"
     ffmpeg -y -i "$LAST_VIDEO" \
-      -vf "fps=15,scale=1280:-1:flags=lanczos" \
+      -vf "fps=10,scale=640:-1:flags=lanczos,split[s0][s1];[s0]palettegen[p];[s1][p]paletteuse" \
+      -loop 0 \
       "$GIF_FILE"
   fi
 
