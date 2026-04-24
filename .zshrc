@@ -67,6 +67,7 @@ function qwen_planner() {
 			--port 8001 \
 			--host 0.0.0.0 \
 			--ctx-size 262144 \
+			--flash-attn on \
 			--temp 1.0 \
 			--top-p 0.95 \
 			--top-k 20 \
@@ -74,13 +75,14 @@ function qwen_planner() {
 			--presence_penalty 1.5
 	}
 
-function qwen_next() {
+function qwen_coder() {
     cd $HOME/repos/llama.cpp/build/bin/
     ./llama-server \
         --model $HOME/models/qwen3-next/Q3_K_M.gguf \
         --alias "qwen3-coder-next" \
         --fit on \
-			  --ctx-size 49152 \
+			  --ctx-size 145000 \
+			  --flash-attn on \
         --cache-reuse 256 \
         --port 8080 \
         --host 0.0.0.0 \
@@ -108,3 +110,4 @@ source $HOME/.work_setup
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
 eval "$(zoxide init zsh)"
 . "$HOME/.local/share/../bin/env"
+source /etc/profile.d/golang_path.sh
