@@ -53,10 +53,17 @@ export OPENAI_API_KEY="sk-no-key-required"
 export OPENAI_BASE_URL="http://localhost:8080/v1"
 
 function llama_update() {
-	cd $HOME/repos/llama.cpp/
-	# rm -rf llama.cpp/build/
-	cmake -B build
-	cmake --build build --config Release -j 8
+    cd $HOME/repos/llama.cpp/
+    echo "📥 Pulling latest llama.cpp changes..."
+    git pull
+    # rm -rf build/
+    echo "🔧 Configuring CMake with CUDA support..."
+    cmake -B build \
+        -DGGML_CUDA=ON \
+        -DLLAMA_CURL=ON \
+        -DCMAKE_BUILD_TYPE=Release
+    echo "🏗️ Building llama.cpp (this may take a few minutes)..."
+    cmake --build build --config Release -j $(nproc)
 }
 
 function qwen_planner() {
@@ -66,13 +73,15 @@ function qwen_planner() {
 			--mmproj $HOME/models/qwen3.6-35b/mmproj-F16.gguf \
 			--port 8001 \
 			--host 0.0.0.0 \
-			--ctx-size 262144 \
+			--ctx-size 222822 \
 			--flash-attn on \
 			--temp 1.0 \
 			--top-p 0.95 \
 			--top-k 20 \
 			--min-p 0.0 \
-			--presence_penalty 1.5
+			--presence_penalty 1.5 \
+			# --no-mmap \
+			--chat-template-kwargs '{"enable_thinking":true, "preserve_thinking":true}'
 	}
 
 function qwen_coder() {
@@ -81,8 +90,8 @@ function qwen_coder() {
         --model $HOME/models/qwen3-next/Q3_K_M.gguf \
         --alias "qwen3-coder-next" \
         --fit on \
-			  --ctx-size 145000 \
-			  --flash-attn on \
+        --ctx-size 166000 \
+        --flash-attn on \
         --cache-reuse 256 \
         --port 8080 \
         --host 0.0.0.0 \
