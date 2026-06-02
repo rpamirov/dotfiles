@@ -3,3 +3,6 @@
 -- Add any additional options here
 vim.g.lazyvim_picker = "telescope"
 vim.opt.spelllang = { "ru", "en" }
+
+-- Copy to system clipboard via wl-copy (Wayland/Hyprland)
+vim.opt.clipboard = "unnamedplus"
