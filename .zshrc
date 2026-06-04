@@ -66,41 +66,30 @@ function llama_update() {
     cmake --build build --config Release -j $(nproc)
 }
 
-function qwen_planner() {
+function qwen_server() {
+    local reasoning_flag=""
+    if [[ $1 == "think" ]]; then
+        reasoning_flag="--reasoning on"
+    fi
     cd $HOME/repos/llama.cpp/build/bin/
-		./llama-server \
-			--model $HOME/models/qwen3.6-35b/Qwen3.6-35B-A3B-UD-Q3_K_XL.gguf \
-			--mmproj $HOME/models/qwen3.6-35b/mmproj-F16.gguf \
-			--port 8001 \
-			--host 0.0.0.0 \
-			--ctx-size 222822 \
-			--flash-attn on \
-			--temp 1.0 \
-			--top-p 0.95 \
-			--top-k 20 \
-			--min-p 0.0 \
-			--presence_penalty 1.5 \
-			# --no-mmap \
-			--chat-template-kwargs '{"enable_thinking":true, "preserve_thinking":true}'
-	}
-
-function qwen_coder() {
-    cd $HOME/repos/llama.cpp/build/bin/
+    export LLAMA_NO_HF_MIGRATION=1
     ./llama-server \
-        --model $HOME/models/qwen3-next/Q3_K_M.gguf \
-        --alias "qwen3-coder-next" \
-        --fit on \
-        --ctx-size 166000 \
-        --flash-attn on \
-        --cache-reuse 256 \
+        --alias "Qwen3.6-35B-A3B-UD-Q4_K_XL" \
+        --model $HOME/models/qwen3.6-35b/Qwen3.6-35B-A3B-UD-Q4_K_XL.gguf \
+        --mmproj $HOME/models/qwen3.6-35b/mmproj-F16.gguf \
         --port 8080 \
         --host 0.0.0.0 \
-        --jinja \
-        --temp 1.0 \
+        --ctx-size 140000 \
+        --fit on \
+        --tensor-split 8,4 \
+        --flash-attn on \
+        ${=reasoning_flag} \
+        --temp 0.6 \
         --top-p 0.95 \
-        --top-k 40 \
-        --min-p 0.01 \
-        --repeat-penalty 1.0
+        --top-k 20 \
+        --presence-penalty 1.5 \
+        --repeat-penalty 1.0 \
+        --no-mmap
 }
 
 # LazyVim
