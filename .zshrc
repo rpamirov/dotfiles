@@ -67,7 +67,7 @@ function llama_update() {
 }
 
 function qwen_server() {
-    local reasoning_flag=""
+    local reasoning_flag="--reasoning off"
     if [[ $1 == "think" ]]; then
         reasoning_flag="--reasoning on"
     fi
