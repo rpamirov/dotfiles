@@ -108,4 +108,4 @@ source $HOME/.work_setup
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
 eval "$(zoxide init zsh)"
 . "$HOME/.local/share/../bin/env"
-source /etc/profile.d/golang_path.sh
+[ -f ~/etc/profile.d/go ] && source /etc/profile.d/golang_path.sh
