@@ -68,7 +68,7 @@ if pgrep -x wf-recorder >/dev/null; then
 
     echo "Creating GIF with ${GIF_SPEED}x speed..."
     ffmpeg -y -i "$LAST_VIDEO" \
-      -vf "fps=10,scale=640:-1:flags=lanczos,$SPEED_FILTER,split[s0][s1];[s0]palettegen[p];[s1][p]paletteuse" \
+      -vf "fps=10,scale=1080:-1:flags=lanczos,$SPEED_FILTER,split[s0][s1];[s0]palettegen[p];[s1][p]paletteuse" \
       -loop 0 \
       "$GIF_FILE" 2>/dev/null
 

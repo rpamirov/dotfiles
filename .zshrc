@@ -67,29 +67,64 @@ function llama_update() {
 }
 
 function qwen_server() {
-    local reasoning_flag="--reasoning off"
-    if [[ $1 == "think" ]]; then
-        reasoning_flag="--reasoning on"
+    # Parse args: flags (--think / --mmproj <path>) in any order
+    local has_think=false
+    local mmproj_path=""
+    local expect_mmproj=false
+
+    for arg in "$@"; do
+        case $arg in
+            --think) has_think=true ;;
+            --mmproj) expect_mmproj=true ;;
+            --mmproj=*) mmproj_path=${arg#--mmproj=} ;;
+            *)
+                if [[ $expect_mmproj == true ]]; then
+                    mmproj_path=$arg
+                    expect_mmproj=false
+                fi
+                ;;
+        esac
+    done
+
+    # GPU layer budget: tested 25=OK with mmproj, 28=OK without
+    local gpu_layers=28
+    if [[ -n $mmproj_path ]]; then
+        gpu_layers=25
     fi
+
     cd $HOME/repos/llama.cpp/build/bin/
     export LLAMA_NO_HF_MIGRATION=1
-    ./llama-server \
-        --alias "Qwen3.6-35B-A3B-UD-Q4_K_XL" \
-        --model $HOME/models/qwen3.6-35b/Qwen3.6-35B-A3B-UD-Q4_K_XL.gguf \
-        --mmproj $HOME/models/qwen3.6-35b/mmproj-F16.gguf \
-        --port 8080 \
-        --host 0.0.0.0 \
-        --ctx-size 140000 \
-        --fit on \
-        --tensor-split 8,4 \
-        --flash-attn on \
-        ${=reasoning_flag} \
-        --temp 0.6 \
-        --top-p 0.95 \
-        --top-k 20 \
-        --presence-penalty 1.5 \
-        --repeat-penalty 1.0 \
-        --no-mmap
+
+    local -a cmd=(
+        ./llama-server
+        --alias "Qwen3.6-35B-A3B-UD-Q3_K_XL"
+        --model $HOME/models/qwen3.6-35b/Qwen3.6-35B-A3B-UD-Q3_K_XL.gguf
+        --port 8080
+        --host 0.0.0.0
+        --flash-attn on
+        --n-gpu-layers $gpu_layers
+        --temp 0.6
+        --top-p 0.95
+        --top-k 20
+        --presence-penalty 1.5
+        --repeat-penalty 1.0
+        --threads $(nproc)
+        --threads-batch $(nproc)
+        --batch-size 512
+        --ctx-size 4096
+    )
+
+    if [[ $has_think == true ]]; then
+        cmd+=(--reasoning on)
+    else
+        cmd+=(--reasoning off)
+    fi
+
+    if [[ -n $mmproj_path ]]; then
+        cmd+=(--mmproj $mmproj_path)
+    fi
+
+    "${cmd[@]}"
 }
 
 # LazyVim
