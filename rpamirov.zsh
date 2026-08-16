@@ -44,3 +44,7 @@ function toggle-theme() {
 		kitty +kitten themes --reload-in=all Rosé Pine
 	fi
 	}
+
+# function kamboja() {
+# 	sudo /usr/local/sbin/kamboja "$@"
+# }
