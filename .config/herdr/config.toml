@@ -1,0 +1,92 @@
+# Herdr keybindings aligned with ~/.tmux.conf.
+onboarding = false
+
+[ui]
+agent_panel_sort = "spaces"
+sidebar_start_collapsed = false
+
+[keys]
+# Keep tmux's default prefix.
+prefix = "ctrl+b"
+
+# tmux session/window navigation equivalents.
+workspace_picker = "prefix+s"
+new_tab = "prefix+c"
+previous_tab = "prefix+p"
+next_tab = "prefix+n"
+switch_tab = "prefix+1..9"
+# Assign visible 1..9 numbers to spaces and switch with prefix+shift+1..9.
+switch_workspace = "prefix+shift+1..9"
+
+# Vim/Neovim-aware pane navigation is provided by herdr-splits.nvim.
+# Keep the built-in bindings empty so the plugin actions receive these keys.
+focus_pane_left = ""
+focus_pane_down = ""
+focus_pane_up = ""
+focus_pane_right = ""
+
+# Herdr's reliable split shortcuts: prefix+v (side-by-side) and prefix+- (stacked).
+split_vertical = "prefix+v"
+split_horizontal = "prefix+minus"
+
+# tmux pane controls.
+close_pane = "prefix+x"
+zoom = "prefix+z"
+resize_mode = "prefix+r"
+
+# tmux copy-mode entry; Herdr's copy mode uses vi movement.
+copy_mode = "prefix+["
+
+# Keep Herdr's useful prefix bindings explicit.
+reload_config = "prefix+shift+r"
+edit_scrollback = "prefix+e"
+toggle_sidebar = "prefix+b"
+
+# herdr-splits.nvim bridges Neovim splits and Herdr panes.
+[[keys.command]]
+key = "ctrl+h"
+type = "plugin_action"
+command = "herdr-splits.nav-left"
+description = "Navigate left (Neovim/Herdr)"
+
+[[keys.command]]
+key = "ctrl+j"
+type = "plugin_action"
+command = "herdr-splits.nav-down"
+description = "Navigate down (Neovim/Herdr)"
+
+[[keys.command]]
+key = "ctrl+k"
+type = "plugin_action"
+command = "herdr-splits.nav-up"
+description = "Navigate up (Neovim/Herdr)"
+
+[[keys.command]]
+key = "ctrl+l"
+type = "plugin_action"
+command = "herdr-splits.nav-right"
+description = "Navigate right (Neovim/Herdr)"
+
+[[keys.command]]
+key = "alt+h"
+type = "plugin_action"
+command = "herdr-splits.resize-left"
+description = "Resize left (Neovim/Herdr)"
+
+[[keys.command]]
+key = "alt+j"
+type = "plugin_action"
+command = "herdr-splits.resize-down"
+description = "Resize down (Neovim/Herdr)"
+
+[[keys.command]]
+key = "alt+k"
+type = "plugin_action"
+command = "herdr-splits.resize-up"
+description = "Resize up (Neovim/Herdr)"
+
+[[keys.command]]
+key = "alt+l"
+type = "plugin_action"
+command = "herdr-splits.resize-right"
+description = "Resize right (Neovim/Herdr)"
