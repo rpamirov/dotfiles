@@ -1,6 +1,3 @@
-export OPENAI_API_KEY="sk-no-key-required"
-export OPENAI_BASE_URL="http://localhost:8080/v1"
-
 function llama_update() {
     cd "$LLAMA" || return 1
     echo "📥 Pulling latest llama.cpp changes..."
@@ -57,6 +54,7 @@ function qwen_server() {
     local repeat_penalty=1.0
     local quantized_kv=false
     local seed=""
+    local api_key="sk-no-key-required"
 
 
     # Parse arguments
@@ -232,7 +230,7 @@ function qwen_server() {
         --model "$model_path"
         --port 8080
         --host 0.0.0.0
-        --api-key "$OPENAI_API_KEY"
+        --api-key "$api_key"
         --flash-attn on
         --temp "$temp"
         --top-p "$top_p"
