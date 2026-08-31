@@ -1,3 +1,26 @@
+: ${LLAMA_MODELS_DIR:=/DATA/SQA/LLM/models}
+: ${LLAMA_API_KEY:=sk-no-key-required}
+
+typeset -gx LLAMA_PORT=9931
+typeset -gx LLAMA_BASE_URL="http://localhost:${LLAMA_PORT}/v1"
+export LLAMA_API_KEY LLAMA_MODELS_DIR
+
+typeset -g LLAMA_MODEL_171="$LLAMA_MODELS_DIR/Qwen3.6-35B-A3B-UD-Q4_K_XL.gguf"
+typeset -g LLAMA_MODEL_172="$LLAMA_MODELS_DIR/qwen3.8-27b/Qwen3.8-27B-UD-Q8_K_XL.gguf"
+typeset -g LLAMA_MODEL_LOCAL="$LLAMA_MODELS_DIR/Qwen3.6-35B-A3B-UD-IQ4_NL.gguf"
+
+function _qwen_default_model() {
+    local addresses=" $(hostname -I 2>/dev/null) "
+
+    if [[ "$addresses" == *" 192.168.31.171 "* ]]; then
+        print -r -- "$LLAMA_MODEL_171"
+    elif [[ "$addresses" == *" 192.168.31.172 "* ]]; then
+        print -r -- "$LLAMA_MODEL_172"
+    else
+        print -r -- "$LLAMA_MODEL_LOCAL"
+    fi
+}
+
 function llama_update() {
     cd "$LLAMA" || return 1
     echo "📥 Pulling latest llama.cpp changes..."
@@ -37,25 +60,33 @@ function llama_update() {
 }
 
 function qwen_server() {
+    local default_ctx_size=131072
+    local large_ctx_size=262144
+    local large_ctx_vram_mib=45000
+    local default_temp=0.7
+    local default_top_p=0.80
+    local default_presence_penalty=1.5
+    local think_temp=1.0
+    local think_top_p=0.95
+    local think_presence_penalty=0.0
+
     local has_think=false
     local mtp_mode=false
     local dry_run=false
     local mmproj_path=""
-    local model_path=""
+    local model_path=$(_qwen_default_model)
     local model_name="qwen"
-    local ctx_size=262144
+    local ctx_size=$default_ctx_size
     local ctx_size_set=false
     local parallel=1
-    local temp=1.0
-    local top_k=40
-    local top_p=0.95
-    local min_p=0.01
-    local presence_penalty=0.0
+    local temp=$default_temp
+    local top_k=20
+    local top_p=$default_top_p
+    local min_p=0.0
+    local presence_penalty=$default_presence_penalty
     local repeat_penalty=1.0
-    local quantized_kv=false
-    local seed=""
-    local api_key="sk-no-key-required"
-
+    local quantized_kv=true
+    local api_key="$LLAMA_API_KEY"
 
     # Parse arguments
     while [[ $# -gt 0 ]]; do
@@ -89,8 +120,8 @@ function qwen_server() {
                 shift 2
                 ;;
             --ctx-size)
-                [[ $# -ge 2 ]] || {
-                    echo "❌ --ctx-size requires a value"
+                [[ $# -ge 2 && "$2" == <-> && "$2" -gt 0 ]] || {
+                    echo "❌ --ctx-size requires a positive integer"
                     return 1
                 }
                 ctx_size="$2"
@@ -107,7 +138,7 @@ function qwen_server() {
                 ;;
             *)
                 echo "❌ Unknown option: $1"
-                echo "Usage: qwen_server --model /path/to/model.gguf [--think] [--mtp] [--mmproj /path/to/mmproj.gguf] [--ctx-size N] [--parallel N] [--dry-run]"
+                echo "Usage: qwen_server [--model /path/to/model.gguf] [--think | --mtp] [--mmproj /path/to/mmproj.gguf] [--ctx-size N] [--parallel N] [--dry-run]"
                 return 1
                 ;;
         esac
@@ -119,14 +150,9 @@ function qwen_server() {
         return 1
     fi
 
-    # Validate model path
-    if [[ -z "$model_path" ]]; then
-        echo "❌ Please specify model path: --model /path/to/model.gguf"
-        return 1
-    fi
-
     if [[ ! -f "$model_path" ]]; then
         echo "❌ Model not found: $model_path"
+        echo "   Override it with: qwen_server --model /path/to/model.gguf"
         return 1
     fi
 
@@ -135,79 +161,19 @@ function qwen_server() {
     total_vram_mib=$(nvidia-smi --query-gpu=memory.total --format=csv,noheader,nounits 2>/dev/null |
         awk '{ gsub(/ /, "", $0); total += $0 } END { print total + 0 }')
 
-    # Select inference defaults from the model name. Explicit CLI arguments
-    # remain authoritative, and hardware only selects a safe context within
-    # each model profile.
-    model_name=$(basename "$model_path" .gguf)
-    if [[ "$model_name" == Qwen3.8-27B-* ]]; then
-        if [[ "$ctx_size_set" != true ]]; then
-            if [[ "$gpu_count" -gt 1 && "$total_vram_mib" -ge 45000 ]]; then
-                ctx_size=262144
-            elif [[ "$total_vram_mib" -ge 22000 ]]; then
-                ctx_size=65536
-            else
-                ctx_size=131072
-            fi
+    if [[ "$ctx_size_set" != true ]]; then
+        if [[ "$gpu_count" -gt 1 && "$total_vram_mib" -ge "$large_ctx_vram_mib" ]]; then
+            ctx_size=$large_ctx_size
         fi
-
-        top_k=20
-        min_p=0.0
-        quantized_kv=true
-
-        if [[ "$has_think" == true ]]; then
-            temp=1.0
-            top_p=0.95
-            presence_penalty=0.0
-        else
-            temp=0.7
-            top_p=0.80
-            presence_penalty=1.5
-        fi
-    elif [[ "$model_name" == Qwen3.6-35B-A3B-* ]]; then
-        if [[ "$ctx_size_set" != true ]]; then
-            if [[ "$gpu_count" -gt 1 && "$total_vram_mib" -ge 45000 ]]; then
-                ctx_size=262144
-            elif [[ "$total_vram_mib" -ge 22000 ]]; then
-                ctx_size=65536
-            else
-                ctx_size=32768
-            fi
-        fi
-
-        top_k=20
-        min_p=0.0
-        quantized_kv=true
-
-        if [[ "$has_think" == true ]]; then
-            temp=1.0
-            top_p=0.95
-        else
-            temp=0.7
-            top_p=0.80
-            presence_penalty=1.5
-        fi
-    elif [[ "$model_name" == Qwen3-Coder-Next-* ]]; then
-        if [[ "$has_think" == true ]]; then
-            echo "❌ Qwen3-Coder-Next is a non-thinking model; remove --think"
-            return 1
-        fi
-
-        [[ "$ctx_size_set" == true ]] || ctx_size=131072
-        temp=1.0
-        top_p=0.95
-        top_k=40
-        min_p=0.01
-        presence_penalty=0.0
-        repeat_penalty=1.0
-        quantized_kv=true
-        seed=3407
-    elif [[ "$has_think" == true ]]; then
-        temp=0.6
-        top_p=0.95
-        min_p=0.0
-        top_k=20
     fi
 
+
+    model_name=$(basename "$model_path" .gguf)
+    if [[ "$has_think" == true ]]; then
+        temp=$think_temp
+        top_p=$think_top_p
+        presence_penalty=$think_presence_penalty
+    fi
 
     if [[ "$gpu_count" -gt 1 ]]; then
         cd "$LLAMA/duplet_build/bin" || return 1
@@ -217,18 +183,11 @@ function qwen_server() {
 
     export LLAMA_NO_HF_MIGRATION=1
 
-    local -a load_args
-    if [[ "$total_vram_mib" -le 13000 ]]; then
-        load_args=(--no-mmap)
-    else
-        load_args=(--load-mode none)
-    fi
-
     local -a cmd=(
         ./llama-server
         --alias "$model_name"
         --model "$model_path"
-        --port 8080
+        --port "$LLAMA_PORT"
         --host 0.0.0.0
         --api-key "$api_key"
         --flash-attn on
@@ -236,14 +195,12 @@ function qwen_server() {
         --top-p "$top_p"
         --min-p "$min_p"
         --top-k "$top_k"
-        "${load_args[@]}"
+        --load-mode none
         --parallel "$parallel"
         --presence-penalty "$presence_penalty"
         --repeat-penalty "$repeat_penalty"
         --ctx-size "$ctx_size"
     )
-
-    [[ -z "$seed" ]] || cmd+=(--seed "$seed")
 
     if [[ "$quantized_kv" == true ]]; then
         cmd+=(
@@ -302,16 +259,16 @@ function qwen_server() {
         return 0
     fi
 
-    sudo ufw allow 8080/tcp
+    sudo ufw allow "$LLAMA_PORT/tcp"
 
     # Ensure the temporary firewall rule is removed on exit or interruption.
-    trap 'sudo ufw delete allow 8080/tcp >/dev/null 2>&1' EXIT INT TERM
+    trap 'sudo ufw delete allow "$LLAMA_PORT/tcp" >/dev/null 2>&1' EXIT INT TERM
 
     "${cmd[@]}"
     local exit_code=$?
 
     trap - EXIT INT TERM
-    sudo ufw delete allow 8080/tcp
+    sudo ufw delete allow "$LLAMA_PORT/tcp"
 
     return "$exit_code"
 }

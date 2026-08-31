@@ -31,6 +31,7 @@ eval "$(zoxide init zsh)"
 
 # Pi
 export PATH="$HOME/.local/bin:$PATH"
+export PATH="$HOME/.npm-global/bin:$PATH"
 
 # opencode
 export PATH=/home/rpamirov/.opencode/bin:$PATH
