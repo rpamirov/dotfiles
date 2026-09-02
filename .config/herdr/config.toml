@@ -4,6 +4,10 @@ onboarding = false
 [ui]
 agent_panel_sort = "spaces"
 sidebar_start_collapsed = false
+# Show the Herdr server's hostname in the top-right tab bar.
+tab_bar_position = "top"
+tab_bar_right = [{ type = "hostname" }]
+tab_bar_right_separator = "  ·  "
 
 [keys]
 # Keep tmux's default prefix.
@@ -17,8 +21,11 @@ next_tab = "prefix+n"
 switch_tab = "prefix+1..9"
 # Assign visible 1..9 numbers to spaces and switch with prefix+shift+1..9.
 switch_workspace = "prefix+shift+1..9"
+# Vim-style movement while the space/workspace navigator is open (prefix+s).
+navigate_workspace_up = "k"
+navigate_workspace_down = "j"
 
-# Vim/Neovim-aware pane navigation is provided by herdr-splits.nvim.
+# Vim/Neovim-aware pane navigation is provided by smart-splits.nvim.
 # Keep the built-in bindings empty so the plugin actions receive these keys.
 focus_pane_left = ""
 focus_pane_down = ""
@@ -42,51 +49,55 @@ reload_config = "prefix+shift+r"
 edit_scrollback = "prefix+e"
 toggle_sidebar = "prefix+b"
 
-# herdr-splits.nvim bridges Neovim splits and Herdr panes.
+# smart-splits.nvim bridges Neovim splits and Herdr panes.
 [[keys.command]]
 key = "ctrl+h"
 type = "plugin_action"
-command = "herdr-splits.nav-left"
-description = "Navigate left (Neovim/Herdr)"
+command = "smart-splits.nvim.left"
+description = "Navigate left (Neovim/Herdr/Kitty/tmux)"
 
 [[keys.command]]
 key = "ctrl+j"
 type = "plugin_action"
-command = "herdr-splits.nav-down"
-description = "Navigate down (Neovim/Herdr)"
+command = "smart-splits.nvim.down"
+description = "Navigate down (Neovim/Herdr/Kitty/tmux)"
 
 [[keys.command]]
 key = "ctrl+k"
 type = "plugin_action"
-command = "herdr-splits.nav-up"
-description = "Navigate up (Neovim/Herdr)"
+command = "smart-splits.nvim.up"
+description = "Navigate up (Neovim/Herdr/Kitty/tmux)"
 
 [[keys.command]]
 key = "ctrl+l"
 type = "plugin_action"
-command = "herdr-splits.nav-right"
-description = "Navigate right (Neovim/Herdr)"
+command = "smart-splits.nvim.right"
+description = "Navigate right (Neovim/Herdr/Kitty/tmux)"
 
+# Keep resize forwarding on the Herdr side. The helper forwards Alt+h/j/k/l
+# into Neovim when the focused Herdr pane contains Neovim; otherwise it resizes
+# the Herdr pane directly. smart-splits.nvim then handles Kitty/tmux when
+# Neovim is running directly under those multiplexers.
 [[keys.command]]
 key = "alt+h"
 type = "plugin_action"
 command = "herdr-splits.resize-left"
-description = "Resize left (Neovim/Herdr)"
+description = "Resize left (Neovim/Herdr/Kitty/tmux)"
 
 [[keys.command]]
 key = "alt+j"
 type = "plugin_action"
 command = "herdr-splits.resize-down"
-description = "Resize down (Neovim/Herdr)"
+description = "Resize down (Neovim/Herdr/Kitty/tmux)"
 
 [[keys.command]]
 key = "alt+k"
 type = "plugin_action"
 command = "herdr-splits.resize-up"
-description = "Resize up (Neovim/Herdr)"
+description = "Resize up (Neovim/Herdr/Kitty/tmux)"
 
 [[keys.command]]
 key = "alt+l"
 type = "plugin_action"
 command = "herdr-splits.resize-right"
-description = "Resize right (Neovim/Herdr)"
+description = "Resize right (Neovim/Herdr/Kitty/tmux)"

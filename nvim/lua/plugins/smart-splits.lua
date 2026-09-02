@@ -1,6 +1,5 @@
 return {
   "mrjones2014/smart-splits.nvim",
-  cond = vim.env.HERDR_ENV ~= "1",
   build = "./kitty/install-kittens.bash",
   extensions = {},
   lazy = false,
@@ -45,11 +44,14 @@ return {
 
     opts.ignored_filetypes = vim.list_extend(opts.ignored_filetypes or {}, { "lazy" })
 
-    opts.default_amount = 1
+    -- Use the same resize step as the Herdr/tmux bindings.
+    opts.default_amount = 3
 
     opts.cursor_follows_swapped_bufs = true
 
-    opts.multiplexer_integration = "tmux"
+    -- Auto-detect Herdr, tmux, Kitty, or another supported multiplexer.
+    -- Herdr takes precedence when HERDR_ENV is present.
+    opts.multiplexer_integration = nil
   end,
   config = function(_, opts) require("smart-splits").setup(opts) end,
 }
