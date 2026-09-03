@@ -1,0 +1,25 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git config *)",
+      "Bash(ls *)",
+      "Bash(cat *)",
+      "Bash(ssh-add *)",
+      "Bash(ssh-keygen *)",
+      "Bash(ssh *)",
+      "Bash(chmod *)",
+      "Bash(chown *)",
+      "Bash(which *)",
+      "Bash(gh *)",
+      "Bash(cd *)",
+      "Bash(grep *)",
+      "Bash(echo *)",
+      "Bash(git *)",
+      "Bash(find *)",
+      "Bash(herdr *)",
+      "Bash(curl *)",
+      "Bash(python3 *)"
+    ]
+  },
+  "$version": 4
+}

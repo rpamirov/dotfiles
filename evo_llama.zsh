@@ -3,7 +3,6 @@
 
 typeset -gx LLAMA_PORT=9931
 typeset -gx LLAMA_BASE_URL="http://localhost:${LLAMA_PORT}/v1"
-export LLAMA_API_KEY LLAMA_MODELS_DIR
 
 typeset -g LLAMA_MODEL_171="$LLAMA_MODELS_DIR/Qwen3.6-35B-A3B-UD-Q4_K_XL.gguf"
 typeset -g LLAMA_MODEL_172="$LLAMA_MODELS_DIR/qwen3.8-27b/Qwen3.8-27B-UD-Q8_K_XL.gguf"

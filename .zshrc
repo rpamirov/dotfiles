@@ -35,3 +35,9 @@ export PATH="$HOME/.npm-global/bin:$PATH"
 
 # opencode
 export PATH=/home/rpamirov/.opencode/bin:$PATH
+
+# Load SSH key for GitHub (used by Neovim lazy.nvim and other tools)
+if [ -z "$SSH_AUTH_SOCK" ]; then
+    eval "$(ssh-agent -s)" 2>/dev/null
+    ssh-add ~/.ssh/id_ed25519 2>/dev/null
+fi
