@@ -25,7 +25,7 @@ switch_workspace = "prefix+shift+1..9"
 navigate_workspace_up = "k"
 navigate_workspace_down = "j"
 
-# Pane navigation and resizing are handled by smart-splits.nvim.
+# Pane navigation and resizing are handled by herdr-splits.nvim.
 # Keep the built-in bindings empty so the plugin actions receive these keys.
 focus_pane_left = ""
 focus_pane_down = ""
@@ -49,29 +49,29 @@ reload_config = "prefix+shift+r"
 edit_scrollback = "prefix+e"
 toggle_sidebar = "prefix+b"
 
-# smart-splits.nvim bridges Neovim splits and Herdr/Kitty/tmux panes.
+# herdr-splits.nvim bridges Neovim splits and Herdr panes.
 [[keys.command]]
 key = "ctrl+h"
 type = "plugin_action"
-command = "smart-splits.nvim.left"
+command = "herdr-splits.nav-left"
 description = "Navigate left (Neovim/Herdr/Kitty/tmux)"
 
 [[keys.command]]
 key = "ctrl+j"
 type = "plugin_action"
-command = "smart-splits.nvim.down"
+command = "herdr-splits.nav-down"
 description = "Navigate down (Neovim/Herdr/Kitty/tmux)"
 
 [[keys.command]]
 key = "ctrl+k"
 type = "plugin_action"
-command = "smart-splits.nvim.up"
+command = "herdr-splits.nav-up"
 description = "Navigate up (Neovim/Herdr/Kitty/tmux)"
 
 [[keys.command]]
 key = "ctrl+l"
 type = "plugin_action"
-command = "smart-splits.nvim.right"
+command = "herdr-splits.nav-right"
 description = "Navigate right (Neovim/Herdr/Kitty/tmux)"
 
 # Keep resize forwarding on the Herdr side. The helper forwards Alt+h/j/k/l
