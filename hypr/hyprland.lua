@@ -1,6 +1,8 @@
 -- Hyprland 0.55+ Lua configuration.
 -- https://wiki.hypr.land/Configuring/Start/
 
+local host = dofile("/home/rpamirov/repos/dotfiles/hypr/host.lua")
+
 hl.monitor({
     output = "",
     mode = "preferred",
@@ -43,12 +45,12 @@ hl.env("SAL_USE_VCLPLUGIN", "gtk3")
 -- spelled non-reparenting hint; do not globally force XToolkit via _JAVA_OPTIONS.
 hl.env("_JAVA_AWT_WM_NONREPARENTING", "1")
 
--- Current NVIDIA variables recommended by the Hyprland documentation.
-hl.env("LIBVA_DRIVER_NAME", "nvidia")
-hl.env("__GLX_VENDOR_LIBRARY_NAME", "nvidia")
-
--- Keep the custom interactive PATH from the previous configuration.
-hl.env("PATH", "/home/rpamirov/.cargo/bin:/usr/local/cuda-12.6/bin:/usr/local/go/bin:/home/rpamirov/.local/share/../bin:/home/rpamirov/.nix-profile/bin:/nix/var/nix/profiles/default/bin:/home/rpamirov/.local/kitty.app/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin")
+-- NVIDIA variables are only useful on the GPU workstation.  Keeping them out
+-- of the laptop profile avoids selecting NVIDIA libraries on Intel graphics.
+if host.nvidia then
+    hl.env("LIBVA_DRIVER_NAME", "nvidia")
+    hl.env("__GLX_VENDOR_LIBRARY_NAME", "nvidia")
+end
 
 hl.config({
     xwayland = {
@@ -110,12 +112,12 @@ hl.config({
 
     -- NVIDIA anti-flicker remains enabled, while direct scanout is disabled to
     -- keep fullscreen applications on Hyprland's synchronized composition path.
-    opengl = {
+    opengl = host.nvidia and {
         nvidia_anti_flicker = true,
-    },
-    render = {
+    } or {},
+    render = host.nvidia and {
         direct_scanout = 0,
-    },
+    } or {},
     cursor = {
         no_hardware_cursors = false,
     },
@@ -276,7 +278,7 @@ hl.on("hyprland.start", function()
     hl.exec_cmd("hyprpaper")
     hl.exec_cmd("xbindkeys")
     hl.exec_cmd("snap run telegram-desktop")
-    hl.exec_cmd("mattermost-desktop --enable-features=UseOzonePlatform,WaylandLinuxDrmSyncobj --ozone-platform=wayland")
+    hl.exec_cmd("snap run mattermost-desktop --enable-features=UseOzonePlatform,WaylandLinuxDrmSyncobj --ozone-platform=wayland")
     hl.exec_cmd("snap run firefox")
     hl.exec_cmd("google-chrome --enable-features=UseOzonePlatform,WaylandLinuxDrmSyncobj --ozone-platform=wayland")
     hl.exec_cmd("snap run remmina")
