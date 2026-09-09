@@ -4,8 +4,8 @@
 typeset -gx LLAMA_PORT=9931
 typeset -gx LLAMA_BASE_URL="http://localhost:${LLAMA_PORT}/v1"
 
-typeset -g LLAMA_MODEL_171="$LLAMA_MODELS_DIR/Qwen3.6-35B-A3B-UD-Q4_K_XL.gguf"
-typeset -g LLAMA_MODEL_172="$LLAMA_MODELS_DIR/qwen3.8-27b/Qwen3.8-27B-UD-Q8_K_XL.gguf"
+typeset -g LLAMA_MODEL_171="$LLAMA_MODELS_DIR/Qwen3.8-27B-UD-Q4_K_M.gguf"
+typeset -g LLAMA_MODEL_172="$LLAMA_MODELS_DIR/Qwen3.8-27B-UD-Q6_K.gguf"
 typeset -g LLAMA_MODEL_LOCAL="$LLAMA_MODELS_DIR/Qwen3.6-35B-A3B-UD-IQ4_NL.gguf"
 
 function _qwen_default_model() {
@@ -69,7 +69,7 @@ function qwen_server() {
     local think_top_p=0.95
     local think_presence_penalty=0.0
 
-    local has_think=false
+    local reasoning_mode=on
     local mtp_mode=false
     local dry_run=false
     local mmproj_path=""
@@ -90,9 +90,13 @@ function qwen_server() {
     # Parse arguments
     while [[ $# -gt 0 ]]; do
         case "$1" in
-            --think)
-                has_think=true
-                shift
+            --reasoning)
+                [[ $# -ge 2 && "$2" == (on|off|auto) ]] || {
+                    echo "❌ --reasoning requires on, off, or auto"
+                    return 1
+                }
+                reasoning_mode="$2"
+                shift 2
                 ;;
             --mtp)
                 mtp_mode=true
@@ -137,17 +141,11 @@ function qwen_server() {
                 ;;
             *)
                 echo "❌ Unknown option: $1"
-                echo "Usage: qwen_server [--model /path/to/model.gguf] [--think | --mtp] [--mmproj /path/to/mmproj.gguf] [--ctx-size N] [--parallel N] [--dry-run]"
+                echo "Usage: qwen_server [--model /path/to/model.gguf] [--reasoning on|off|auto] [--mtp] [--mmproj /path/to/mmproj.gguf] [--ctx-size N] [--parallel N] [--dry-run]"
                 return 1
                 ;;
         esac
     done
-
-    # Validate incompatible modes
-    if [[ "$has_think" == true && "$mtp_mode" == true ]]; then
-        echo "❌ --think and --mtp cannot be used together"
-        return 1
-    fi
 
     if [[ ! -f "$model_path" ]]; then
         echo "❌ Model not found: $model_path"
@@ -166,9 +164,8 @@ function qwen_server() {
         fi
     fi
 
-
     model_name=$(basename "$model_path" .gguf)
-    if [[ "$has_think" == true ]]; then
+    if [[ "$reasoning_mode" == on ]]; then
         temp=$think_temp
         top_p=$think_top_p
         presence_penalty=$think_presence_penalty
@@ -195,6 +192,8 @@ function qwen_server() {
         --min-p "$min_p"
         --top-k "$top_k"
         --load-mode none
+        --fit on
+        --ubatch-size 512
         --parallel "$parallel"
         --presence-penalty "$presence_penalty"
         --repeat-penalty "$repeat_penalty"
@@ -217,19 +216,16 @@ function qwen_server() {
         cmd+=(--mmproj "$mmproj_path")
     fi
 
-    if [[ "$has_think" == true ]]; then
-        cmd+=(
-            --reasoning on
-            --reasoning-preserve
-        )
-    elif [[ "$mtp_mode" == true ]]; then
+    if [[ "$mtp_mode" == true ]]; then
         cmd+=(
             --spec-type draft-mtp
             --spec-draft-n-max 2
-            --reasoning off
         )
-    else
-        cmd+=(--reasoning off)
+    fi
+
+    cmd+=(--reasoning "$reasoning_mode")
+    if [[ "$reasoning_mode" != off ]]; then
+        cmd+=(--reasoning-preserve)
     fi
 
     echo "🚀 Starting Qwen server with:"
@@ -244,7 +240,7 @@ function qwen_server() {
     echo "   Presence:    $presence_penalty"
     echo "   Repeat:      $repeat_penalty"
     echo "   Q8 KV cache: $quantized_kv"
-    echo "   Think:       $has_think"
+    echo "   Reasoning:   $reasoning_mode"
     echo "   MTP:         $mtp_mode"
     echo "   GPUs:        $gpu_count"
     echo "   Total VRAM:  ${total_vram_mib} MiB"

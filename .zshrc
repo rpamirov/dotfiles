@@ -18,11 +18,28 @@ export PATH=/usr/local/cuda-12.6/bin${PATH:+:${PATH}}
 export LD_LIBRARY_PATH=/usr/local/cuda-12.6/lib64\${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}
 
 function start_wayvnc() {
-	export WLR_RENDERER=gles2
+	local -x XDG_RUNTIME_DIR="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}"
+	local -x WAYLAND_DISPLAY="${WAYLAND_DISPLAY:-}"
+	local -x WLR_RENDERER=gles2
+	if [[ -z "$WAYLAND_DISPLAY" ]]; then
+		local socket
+		local -a displays=()
+		for socket in "$XDG_RUNTIME_DIR"/wayland-*(N); do
+			[[ -S "$socket" ]] && displays+=("${socket:t}")
+		done
+		if (( ${#displays} == 0 )); then
+			print -u2 -- "start_wayvnc: no Wayland display found in $XDG_RUNTIME_DIR. Is your desktop running?"
+			return 1
+		elif (( ${#displays} > 1 )); then
+			print -u2 -- "start_wayvnc: multiple Wayland displays found: ${displays[*]}. Run WAYLAND_DISPLAY=<display> start_wayvnc."
+			return 1
+		fi
+		WAYLAND_DISPLAY="${displays[1]}"
+	fi
 	systemctl --user restart xdg-desktop-portal-wlr
 	pkill -f "^/usr/bin/waybar"
 	wayvnc 0.0.0.0 5900
-	}
+}
 
 . "$HOME/.local/share/../bin/env"
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
