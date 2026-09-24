@@ -1,0 +1,15 @@
+[Unit]
+Description=Headless Ideco VPN session with local TOTP
+After=graphical-session.target
+StartLimitIntervalSec=60
+StartLimitBurst=3
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/python %h/.local/libexec/ideco/ideco_session.py
+Restart=on-failure
+RestartSec=5
+TimeoutStopSec=8
+
+[Install]
+WantedBy=default.target

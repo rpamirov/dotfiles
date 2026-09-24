@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "id": "rpamirov.kamboja",
+  "name": "Kamboja VPN",
+  "version": "1.2.0",
+  "author": "rpamirov",
+  "description": "One-click Sing-box Hysteria2 TUN client toggle",
+  "kinds": ["bar-widget"],
+  "entryPoints": {
+    "barWidget": "BarWidget.qml"
+  },
+  "barWidget": {
+    "displayName": "Kamboja VPN",
+    "description": "Toggle the Kamboja Sing-box Hysteria2 tunnel",
+    "category": "Network",
+    "defaultSection": "center",
+    "allowMultiple": false
+  }
+}
